@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VMA Séance">
+<title>Séance VMA</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🏃%3C/text%3E%3C/svg%3E">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    line-height: 1.4;
+  }
+  .container { max-width: 700px; margin: 0 auto; padding: 16px 12px 40px; }
+  header { text-align: center; margin-bottom: 18px; }
+  h1 { font-size: 1.45rem; color: #f1f5f9; font-weight: 700; }
+  h1 span { color: #38bdf8; }
+  .subtitle { color: #94a3b8; font-size: 0.85rem; margin-top: 4px; }
+
+  /* Tabs principaux */
+  .main-tabs {
+    display: flex; gap: 4px; margin-bottom: 18px;
+    background: #1e293b; padding: 4px; border-radius: 12px;
+  }
+  .main-tab {
+    flex: 1; padding: 10px 8px;
+    background: transparent; color: #94a3b8; border: none;
+    font-size: 0.85rem; font-weight: 600;
+    border-radius: 8px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .main-tab.active { background: #38bdf8; color: #0f172a; }
+
+  .main-panel { display: none; animation: fade 0.2s ease; }
+  .main-panel.active { display: block; }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+  /* VMA input compact */
+  .vma-bar {
+    display: flex; align-items: center; gap: 10px;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border: 1px solid #334155;
+    border-radius: 14px;
+    padding: 10px 14px;
+    margin-bottom: 18px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+  }
+  .vma-bar label {
+    font-size: 0.75rem; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .vma-bar .spacer { flex: 1; }
+  .step-btn {
+    background: #334155; color: #e2e8f0; border: none;
+    width: 38px; height: 38px; border-radius: 9px;
+    font-size: 1.3rem; font-weight: 700; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .step-btn:active { background: #475569; }
+  .vma-input {
+    width: 80px; font-size: 1.4rem; font-weight: 700;
+    background: #0f172a; border: 2px solid #334155;
+    color: #38bdf8; padding: 6px 8px;
+    border-radius: 9px; text-align: center;
+    -moz-appearance: textfield;
+  }
+  .vma-input::-webkit-outer-spin-button, .vma-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .vma-input:focus { outline: none; border-color: #38bdf8; }
+  .unit { font-size: 0.9rem; color: #64748b; font-weight: 500; }
+
+  /* Card */
+  .card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+  .card-title {
+    font-size: 0.75rem; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  /* Toggle */
+  .mode-toggle {
+    display: flex; gap: 0;
+    background: #0f172a; padding: 4px;
+    border-radius: 10px; margin-bottom: 14px;
+    border: 1px solid #334155;
+  }
+  .mode-btn {
+    flex: 1;
+    padding: 9px 8px;
+    background: transparent; color: #94a3b8; border: none;
+    font-size: 0.88rem; font-weight: 600;
+    border-radius: 7px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .mode-btn.active { background: #38bdf8; color: #0f172a; }
+
+  /* Champs */
+  .field { margin-bottom: 14px; }
+  .field-label {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 0.8rem; color: #cbd5e1; margin-bottom: 6px; font-weight: 500;
+  }
+  .field-hint {
+    font-size: 0.7rem; color: #64748b; font-weight: 400;
+    text-transform: none; letter-spacing: 0;
+  }
+  .field-hint.filled { color: #38bdf8; }
+  .input-row { display: flex; gap: 6px; align-items: stretch; }
+  .main-input {
+    flex: 1;
+    font-size: 1.15rem; font-weight: 600;
+    background: #0f172a; border: 2px solid #334155;
+    color: #f1f5f9; padding: 10px 12px;
+    border-radius: 9px; text-align: center;
+    -moz-appearance: textfield;
+    min-width: 0;
+  }
+  .main-input::-webkit-outer-spin-button, .main-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .main-input:focus { outline: none; border-color: #38bdf8; }
+  .main-input.computed { color: #38bdf8; background: #0c1a2e; }
+  .unit-select {
+    background: #0f172a; border: 2px solid #334155;
+    color: #f1f5f9; padding: 10px 12px;
+    border-radius: 9px; font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; min-width: 70px;
+  }
+  .unit-select:focus { outline: none; border-color: #38bdf8; }
+
+  /* Saisie durée/temps */
+  .time-row {
+    display: flex; gap: 6px; align-items: center; justify-content: center;
+    background: #0f172a; border: 2px solid #334155;
+    border-radius: 9px; padding: 8px 12px;
+  }
+  .time-row:focus-within { border-color: #38bdf8; }
+  .time-row.computed { background: #0c1a2e; }
+  .time-row.computed .time-input { color: #38bdf8; }
+  .time-input {
+    width: 56px;
+    font-size: 1.4rem; font-weight: 700;
+    background: transparent; border: none;
+    color: #f1f5f9; text-align: center;
+    -moz-appearance: textfield;
+  }
+  .time-input::-webkit-outer-spin-button, .time-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .time-input:focus { outline: none; }
+  .time-sep { font-size: 1.4rem; font-weight: 700; color: #64748b; }
+  .time-label { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; display:block; text-align:center; }
+  .time-cell { display: flex; flex-direction: column; align-items: center; }
+
+  /* Chips rapides */
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip {
+    background: #334155; color: #cbd5e1; border: none;
+    padding: 6px 10px; border-radius: 20px;
+    font-size: 0.78rem; font-weight: 600; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .chip:active, .chip.active { background: #38bdf8; color: #0f172a; }
+
+  /* Allure slider */
+  .pct-display {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .pct-value { font-size: 1.8rem; font-weight: 700; color: #38bdf8; font-variant-numeric: tabular-nums; }
+  .pct-zone {
+    font-size: 0.75rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 3px 9px; border-radius: 6px;
+  }
+  .zone-endu-bg { background: rgba(74, 222, 128, 0.15); color: #4ade80; }
+  .zone-resi-bg { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+  .zone-vma-bg { background: rgba(248, 113, 113, 0.15); color: #f87171; }
+
+  .slider {
+    width: 100%;
+    -webkit-appearance: none; appearance: none;
+    height: 8px; border-radius: 4px;
+    background: linear-gradient(to right, #4ade80 0%, #4ade80 21%, #fbbf24 21%, #fbbf24 50%, #f87171 50%, #f87171 100%);
+    outline: none;
+  }
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: #f1f5f9; border: 3px solid #38bdf8;
+    cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+  .slider::-moz-range-thumb {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: #f1f5f9; border: 3px solid #38bdf8;
+    cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+
+  /* Résultat */
+  .result {
+    background: linear-gradient(135deg, #0c4a6e 0%, #075985 100%);
+    border: 1px solid #0ea5e9;
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 14px;
+    text-align: center;
+  }
+  .result-main {
+    font-size: 2.4rem; font-weight: 800;
+    color: #f0f9ff; font-variant-numeric: tabular-nums;
+    letter-spacing: 0.5px;
+  }
+  .result-label {
+    font-size: 0.7rem; color: #bae6fd;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+  .result-details {
+    display: flex; justify-content: space-around;
+    margin-top: 8px; padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    font-size: 0.8rem; color: #bae6fd;
+  }
+  .result-details strong { color: #f0f9ff; font-weight: 700; font-size: 0.95rem; display: block; font-variant-numeric: tabular-nums; }
+
+  /* Boutons */
+  .add-btn {
+    width: 100%;
+    background: #334155; color: #e2e8f0; border: 2px dashed #475569;
+    padding: 12px; border-radius: 10px;
+    font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; margin-top: 12px;
+    transition: all 0.15s;
+  }
+  .add-btn:active { background: #475569; }
+  .add-btn:hover { border-color: #38bdf8; color: #38bdf8; }
+
+  .reset-btn {
+    width: 100%;
+    background: transparent; color: #94a3b8; border: 1px solid #475569;
+    padding: 10px; border-radius: 9px;
+    font-size: 0.85rem; font-weight: 600;
+    cursor: pointer; margin-top: 10px;
+    transition: all 0.15s;
+  }
+  .reset-btn:active { background: #334155; color: #f87171; border-color: #f87171; }
+
+  /* Séance */
+  .session-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px;
+  }
+  .session-title { font-size: 1rem; font-weight: 700; color: #f1f5f9; }
+  .session-empty { color: #64748b; font-size: 0.85rem; text-align: center; padding: 16px 0; font-style: italic; }
+  .block {
+    background: #0f172a;
+    border: 1px solid #273449;
+    border-left: 3px solid #38bdf8;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .block.endu { border-left-color: #4ade80; }
+  .block.resi { border-left-color: #fbbf24; }
+  .block.vma { border-left-color: #f87171; }
+  .block-info { flex: 1; min-width: 0; }
+  .block-main { font-weight: 600; color: #f1f5f9; font-size: 0.95rem; }
+  .block-sub { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; }
+  .block-right { text-align: right; white-space: nowrap; }
+  .block-time {
+    font-weight: 700; color: #38bdf8;
+    font-size: 1rem; font-variant-numeric: tabular-nums;
+  }
+  .block-dist {
+    font-size: 0.75rem; color: #94a3b8;
+    font-variant-numeric: tabular-nums; margin-top: 2px;
+  }
+  .block-del {
+    background: transparent; border: none; color: #64748b;
+    font-size: 1.2rem; cursor: pointer; padding: 4px 8px;
+    border-radius: 6px;
+  }
+  .block-del:active { background: #334155; color: #f87171; }
+
+  .session-total {
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px solid #334155;
+    display: flex; justify-content: space-between;
+    font-weight: 700; color: #f1f5f9;
+  }
+  .session-total .val { color: #38bdf8; font-variant-numeric: tabular-nums; }
+
+  .clear-btn {
+    background: transparent; border: 1px solid #475569;
+    color: #94a3b8; padding: 4px 10px;
+    border-radius: 6px; font-size: 0.75rem;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .clear-btn.confirm {
+    background: #7f1d1d; color: #fecaca; border-color: #b91c1c;
+  }
+
+  footer { text-align: center; margin-top: 20px; color: #64748b; font-size: 0.75rem; }
+
+  @media (max-width: 420px) {
+    h1 { font-size: 1.2rem; }
+    .result-main { font-size: 2rem; }
+    .vma-input { width: 70px; font-size: 1.2rem; }
+    .step-btn { width: 34px; height: 34px; }
+    .time-input { width: 48px; font-size: 1.2rem; }
+  }
+
+  /* Répétitions */
+  .reps-row {
+    display: flex; gap: 8px; align-items: center; justify-content: center;
+  }
+  .reps-input {
+    width: 80px;
+    font-size: 1.4rem; font-weight: 700;
+    background: #0f172a; border: 2px solid #334155;
+    color: #f1f5f9; padding: 8px 10px;
+    border-radius: 9px; text-align: center;
+    -moz-appearance: textfield;
+  }
+  .reps-input::-webkit-outer-spin-button, .reps-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .reps-input:focus { outline: none; border-color: #38bdf8; }
+  .field-hint#repsHint { color: #38bdf8; font-weight: 600; }
+
+  .result-totals {
+    display: flex; justify-content: space-around;
+    margin-top: 8px; padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    font-size: 0.8rem; color: #bae6fd;
+  }
+  .result-totals strong { color: #fef08a; font-weight: 700; font-size: 1.05rem; display: block; font-variant-numeric: tabular-nums; }
+
+  /* Simulateur */
+  .simu-race {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+  .simu-race-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px; padding-bottom: 10px;
+    border-bottom: 1px solid #334155;
+  }
+  .simu-race-name {
+    font-size: 1.05rem; font-weight: 700; color: #f1f5f9;
+  }
+  .simu-race-dist {
+    font-size: 0.75rem; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+  .simu-race-time {
+    font-size: 1.8rem; font-weight: 800;
+    color: #38bdf8; font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+  .simu-race-pct {
+    font-size: 0.7rem; color: #bae6fd;
+    background: rgba(56, 189, 248, 0.12);
+    padding: 3px 8px; border-radius: 6px;
+    font-weight: 600; margin-top: 3px; display: inline-block;
+  }
+  .simu-details {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    margin-bottom: 12px;
+  }
+  .simu-detail-box {
+    background: #0f172a; border: 1px solid #273449;
+    border-radius: 8px; padding: 8px;
+    text-align: center;
+  }
+  .simu-detail-label {
+    font-size: 0.65rem; color: #64748b;
+    text-transform: uppercase; letter-spacing: 0.4px;
+    margin-bottom: 2px;
+  }
+  .simu-detail-value {
+    font-size: 0.9rem; font-weight: 700; color: #f1f5f9;
+    font-variant-numeric: tabular-nums;
+  }
+  .simu-splits-title {
+    font-size: 0.7rem; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .simu-splits {
+    background: #0f172a; border-radius: 8px;
+    border: 1px solid #273449;
+    max-height: 200px; overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .simu-split-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 12px; font-size: 0.82rem;
+    border-bottom: 1px solid #1e293b;
+    font-variant-numeric: tabular-nums;
+  }
+  .simu-split-row:last-child { border-bottom: none; }
+  .simu-split-row:nth-child(5n) {
+    background: #162032;
+    font-weight: 600;
+  }
+  .simu-split-km { color: #94a3b8; }
+  .simu-split-time { color: #f1f5f9; font-weight: 600; }
+  .simu-split-cum { color: #38bdf8; }
+
+  .race-5k { border-left: 3px solid #f87171; }
+  .race-10k { border-left: 3px solid #fbbf24; }
+  .race-semi { border-left: 3px solid #4ade80; }
+  .race-mara { border-left: 3px solid #38bdf8; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🏃 Séance <span>VMA</span></h1>
+    <p class="subtitle">Calculateur d'allures pour coureurs</p>
+  </header>
+
+  <!-- Onglets principaux -->
+  <div class="main-tabs">
+    <button class="main-tab active" data-panel="seance">Séance VMA</button>
+    <button class="main-tab" data-panel="allure">Allure course</button>
+    <button class="main-tab" data-panel="simu">Simulateur</button>
+  </div>
+
+  <!-- ============ PANEL SÉANCE VMA ============ -->
+  <div id="seance" class="main-panel active">
+    <!-- VMA compact -->
+    <div class="vma-bar">
+      <label>VMA</label>
+      <div class="spacer"></div>
+      <button class="step-btn" onclick="adjustVMA(-0.5)">−</button>
+      <input type="number" id="vma" class="vma-input" value="16" min="6" max="25" step="0.1" inputmode="decimal">
+      <button class="step-btn" onclick="adjustVMA(0.5)">+</button>
+      <span class="unit">km/h</span>
+    </div>
+
+    <!-- Calculateur -->
+    <div class="card">
+      <div class="card-title">Calculateur</div>
+
+      <div class="mode-toggle">
+        <button class="mode-btn active" data-mode="dist">📏 Distance</button>
+        <button class="mode-btn" data-mode="time">⏱ Durée</button>
+      </div>
+
+      <!-- Mode distance -->
+      <div class="field" id="modeDist">
+        <label class="field-label">Distance à parcourir</label>
+        <div class="input-row">
+          <input type="number" id="dist" class="main-input" value="400" min="1" step="any" inputmode="decimal">
+          <select id="unit" class="unit-select">
+            <option value="m">m</option>
+            <option value="km">km</option>
+          </select>
+        </div>
+        <div class="chips" id="distChips">
+          <button class="chip" data-dist="200" data-unit="m">200 m</button>
+          <button class="chip" data-dist="300" data-unit="m">300 m</button>
+          <button class="chip active" data-dist="400" data-unit="m">400 m</button>
+          <button class="chip" data-dist="500" data-unit="m">500 m</button>
+          <button class="chip" data-dist="800" data-unit="m">800 m</button>
+          <button class="chip" data-dist="1" data-unit="km">1 km</button>
+          <button class="chip" data-dist="1.5" data-unit="km">1,5 km</button>
+          <button class="chip" data-dist="2" data-unit="km">2 km</button>
+          <button class="chip" data-dist="3" data-unit="km">3 km</button>
+          <button class="chip" data-dist="5" data-unit="km">5 km</button>
+          <button class="chip" data-dist="10" data-unit="km">10 km</button>
+        </div>
+      </div>
+
+      <!-- Mode durée avec heures -->
+      <div class="field" id="modeTime" style="display:none">
+        <label class="field-label">Durée de l'effort</label>
+        <div class="time-row">
+          <div class="time-cell">
+            <input type="number" id="hours" class="time-input" value="0" min="0" max="10" step="1" inputmode="numeric">
+            <span class="time-label">heures</span>
+          </div>
+          <span class="time-sep">:</span>
+          <div class="time-cell">
+            <input type="number" id="mins" class="time-input" value="1" min="0" max="59" step="1" inputmode="numeric">
+            <span class="time-label">min</span>
+          </div>
+          <span class="time-sep">:</span>
+          <div class="time-cell">
+            <input type="number" id="secs" class="time-input" value="30" min="0" max="59" step="1" inputmode="numeric">
+            <span class="time-label">sec</span>
+          </div>
+        </div>
+        <div class="chips" id="timeChips">
+          <button class="chip" data-sec="15">15 s</button>
+          <button class="chip" data-sec="30">30 s</button>
+          <button class="chip" data-sec="45">45 s</button>
+          <button class="chip" data-sec="60">1 min</button>
+          <button class="chip active" data-sec="90">1 min 30</button>
+          <button class="chip" data-sec="120">2 min</button>
+          <button class="chip" data-sec="180">3 min</button>
+          <button class="chip" data-sec="300">5 min</button>
+          <button class="chip" data-sec="600">10 min</button>
+          <button class="chip" data-sec="1200">20 min</button>
+          <button class="chip" data-sec="1800">30 min</button>
+          <button class="chip" data-sec="3600">1 h</button>
+        </div>
+      </div>
+
+      <!-- Allure -->
+      <div class="field">
+        <label class="field-label">Allure (% VMA)</label>
+        <div class="pct-display">
+          <span class="pct-value" id="pctValue">100%</span>
+          <span class="pct-zone" id="pctZone">VMA</span>
+        </div>
+        <input type="range" id="pct" class="slider" min="50" max="120" step="1" value="100">
+        <div class="chips" id="pctChips">
+          <button class="chip" data-pct="60">60%</button>
+          <button class="chip" data-pct="70">70%</button>
+          <button class="chip" data-pct="75">75%</button>
+          <button class="chip" data-pct="80">80%</button>
+          <button class="chip" data-pct="85">85%</button>
+          <button class="chip" data-pct="90">90%</button>
+          <button class="chip" data-pct="95">95%</button>
+          <button class="chip active" data-pct="100">100%</button>
+          <button class="chip" data-pct="105">105%</button>
+          <button class="chip" data-pct="110">110%</button>
+          <button class="chip" data-pct="120">120%</button>
+        </div>
+      </div>
+
+      <!-- Répétitions -->
+      <div class="field">
+        <label class="field-label">
+          <span>🔁 Nombre de répétitions</span>
+          <span class="field-hint" id="repsHint">× 1</span>
+        </label>
+        <div class="reps-row">
+          <button class="step-btn" id="repsMinus">−</button>
+          <input type="number" id="reps" class="reps-input" value="1" min="1" max="50" step="1" inputmode="numeric">
+          <button class="step-btn" id="repsPlus">+</button>
+        </div>
+        <div class="chips" id="repsChips">
+          <button class="chip active" data-reps="1">× 1</button>
+          <button class="chip" data-reps="2">× 2</button>
+          <button class="chip" data-reps="3">× 3</button>
+          <button class="chip" data-reps="4">× 4</button>
+          <button class="chip" data-reps="5">× 5</button>
+          <button class="chip" data-reps="6">× 6</button>
+          <button class="chip" data-reps="8">× 8</button>
+          <button class="chip" data-reps="10">× 10</button>
+          <button class="chip" data-reps="12">× 12</button>
+          <button class="chip" data-reps="15">× 15</button>
+          <button class="chip" data-reps="20">× 20</button>
+        </div>
+      </div>
+
+      <!-- Résultat -->
+      <div class="result">
+        <div class="result-label" id="resultLabel">TEMPS</div>
+        <div class="result-main" id="resultMain">1:30</div>
+        <div class="result-details">
+          <div>Allure<br><strong id="resultPace">—</strong></div>
+          <div>Vitesse<br><strong id="resultSpeed">—</strong></div>
+        </div>
+        <div class="result-totals" id="resultTotals" style="display:none">
+          <div>Total distance<br><strong id="resultTotalDist">—</strong></div>
+          <div>Total temps<br><strong id="resultTotalTime">—</strong></div>
+        </div>
+      </div>
+
+      <button class="add-btn" id="addBtn">+ Ajouter à la séance</button>
+    </div>
+
+    <!-- Séance cumulée -->
+    <div class="card">
+      <div class="session-header">
+        <div class="session-title">Ma séance</div>
+        <button class="clear-btn" id="clearBtn">Tout effacer</button>
+      </div>
+      <div id="sessionList"></div>
+      <div class="session-total" id="sessionTotal" style="display:none">
+        <span>Total</span>
+        <span><span id="totalDist">0</span> · <span class="val" id="totalTime">0:00</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PANEL ALLURE COURSE ============ -->
+  <div id="allure" class="main-panel">
+    <div class="card">
+      <div class="card-title">Calculateur allure / distance / temps</div>
+      <p style="font-size:0.8rem; color:#94a3b8; margin-bottom:14px;">
+        Remplis <strong style="color:#38bdf8">2 champs</strong> quelconques. Les 2 autres se calculent automatiquement.
+      </p>
+
+      <!-- Temps de course -->
+      <div class="field">
+        <label class="field-label">
+          <span>⏱ Temps de course</span>
+          <span class="field-hint" id="hint-rt">saisi</span>
+        </label>
+        <div class="time-row" id="rtRow">
+          <div class="time-cell">
+            <input type="number" id="rtH" class="time-input" value="" placeholder="0" min="0" max="48" step="1" inputmode="numeric" data-field="rt">
+            <span class="time-label">heures</span>
+          </div>
+          <span class="time-sep">:</span>
+          <div class="time-cell">
+            <input type="number" id="rtM" class="time-input" value="" placeholder="0" min="0" max="59" step="1" inputmode="numeric" data-field="rt">
+            <span class="time-label">min</span>
+          </div>
+          <span class="time-sep">:</span>
+          <div class="time-cell">
+            <input type="number" id="rtS" class="time-input" value="" placeholder="0" min="0" max="59" step="1" inputmode="numeric" data-field="rt">
+            <span class="time-label">sec</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Distance -->
+      <div class="field">
+        <label class="field-label">
+          <span>📏 Distance parcourue</span>
+          <span class="field-hint" id="hint-d">saisi</span>
+        </label>
+        <div class="input-row">
+          <input type="number" id="rDist" class="main-input" value="" placeholder="—" min="0" step="any" inputmode="decimal" data-field="d">
+          <select id="rUnit" class="unit-select">
+            <option value="km">km</option>
+            <option value="m">m</option>
+          </select>
+        </div>
+        <div class="chips" id="rDistChips">
+          <button class="chip" data-rd="5" data-ru="km">5 km</button>
+          <button class="chip" data-rd="10" data-ru="km">10 km</button>
+          <button class="chip" data-rd="15" data-ru="km">15 km</button>
+          <button class="chip" data-rd="21.1" data-ru="km">Semi</button>
+          <button class="chip" data-rd="42.195" data-ru="km">Marathon</button>
+        </div>
+      </div>
+
+      <!-- Allure -->
+      <div class="field">
+        <label class="field-label">
+          <span>🏃 Allure (min:sec par km)</span>
+          <span class="field-hint" id="hint-p">saisi</span>
+        </label>
+        <div class="time-row" id="pRow">
+          <div class="time-cell">
+            <input type="number" id="pM" class="time-input" value="" placeholder="0" min="0" max="20" step="1" inputmode="numeric" data-field="p">
+            <span class="time-label">min</span>
+          </div>
+          <span class="time-sep">:</span>
+          <div class="time-cell">
+            <input type="number" id="pS" class="time-input" value="" placeholder="0" min="0" max="59" step="1" inputmode="numeric" data-field="p">
+            <span class="time-label">sec / km</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vitesse -->
+      <div class="field">
+        <label class="field-label">
+          <span>⚡ Vitesse</span>
+          <span class="field-hint" id="hint-v">saisi</span>
+        </label>
+        <div class="input-row">
+          <input type="number" id="rSpeed" class="main-input" value="" placeholder="—" min="0" step="0.1" inputmode="decimal" data-field="v">
+          <div class="unit-select" style="cursor:default; display:flex; align-items:center; justify-content:center;">km/h</div>
+        </div>
+      </div>
+
+      <button class="reset-btn" id="resetAllure">↺ Tout effacer</button>
+    </div>
+  </div>
+
+  <!-- ============ PANEL SIMULATEUR ============ -->
+  <div id="simu" class="main-panel">
+    <!-- VMA input (partagée avec l'onglet séance) -->
+    <div class="vma-bar">
+      <label>VMA</label>
+      <div class="spacer"></div>
+      <button class="step-btn" onclick="adjustVMASimu(-0.5)">−</button>
+      <input type="number" id="vmaSimu" class="vma-input" value="16" min="6" max="25" step="0.1" inputmode="decimal">
+      <button class="step-btn" onclick="adjustVMASimu(0.5)">+</button>
+      <span class="unit">km/h</span>
+    </div>
+
+    <p style="font-size:0.8rem; color:#94a3b8; margin-bottom:14px; padding: 0 4px;">
+      Estimation du temps de course sur les distances classiques, selon le % de VMA tenable.
+    </p>
+
+    <div id="simuRaces"></div>
+  </div>
+
+  <footer>
+    VMA = Vitesse Maximale Aérobie · Fonctionne hors-ligne
+  </footer>
+</div>
+
+<script>
+  // ========= UTILS =========
+  function fmtTime(totalSec) {
+    if (!isFinite(totalSec) || totalSec <= 0) return '—';
+    totalSec = Math.round(totalSec);
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    return `${m}:${String(s).padStart(2,'0')}`;
+  }
+  function fmtPace(kmh) {
+    if (kmh <= 0) return '—';
+    const secPerKm = 3600 / kmh;
+    const m = Math.floor(secPerKm / 60);
+    const s = Math.round(secPerKm % 60);
+    return `${m}:${String(s).padStart(2,'0')}/km`;
+  }
+  function fmtDist(m) {
+    if (m >= 1000) return (m/1000).toLocaleString('fr-FR', {maximumFractionDigits: 2}) + ' km';
+    return Math.round(m) + ' m';
+  }
+  function zoneOf(pct) {
+    if (pct < 80) return { label: 'Endurance', cls: 'zone-endu-bg', block: 'endu' };
+    if (pct < 95) return { label: 'Résistance', cls: 'zone-resi-bg', block: 'resi' };
+    return { label: 'VMA', cls: 'zone-vma-bg', block: 'vma' };
+  }
+
+  // ========= ONGLETS PRINCIPAUX =========
+  document.querySelectorAll('.main-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.main-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.panel).classList.add('active');
+    });
+  });
+
+  // =========================================
+  // ====== ONGLET 1 : SÉANCE VMA ============
+  // =========================================
+
+  const vmaInput = document.getElementById('vma');
+  const distInput = document.getElementById('dist');
+  const unitSelect = document.getElementById('unit');
+  const hoursInput = document.getElementById('hours');
+  const minsInput = document.getElementById('mins');
+  const secsInput = document.getElementById('secs');
+  const pctSlider = document.getElementById('pct');
+  const pctValue = document.getElementById('pctValue');
+  const pctZone = document.getElementById('pctZone');
+  const resultMain = document.getElementById('resultMain');
+  const resultLabel = document.getElementById('resultLabel');
+  const resultPace = document.getElementById('resultPace');
+  const resultSpeed = document.getElementById('resultSpeed');
+  const repsInput = document.getElementById('reps');
+  const repsHint = document.getElementById('repsHint');
+  const resultTotals = document.getElementById('resultTotals');
+  const resultTotalDist = document.getElementById('resultTotalDist');
+  const resultTotalTime = document.getElementById('resultTotalTime');
+
+  let mode = 'dist';
+
+  function getDistanceM() {
+    let d = parseFloat(distInput.value);
+    if (!isFinite(d) || d <= 0) return 0;
+    return unitSelect.value === 'km' ? d * 1000 : d;
+  }
+  function getDurationSec() {
+    const h = parseInt(hoursInput.value) || 0;
+    const m = parseInt(minsInput.value) || 0;
+    const s = parseInt(secsInput.value) || 0;
+    return h * 3600 + m * 60 + s;
+  }
+  function getReps() {
+    let r = parseInt(repsInput.value);
+    if (!isFinite(r) || r < 1) r = 1;
+    if (r > 50) r = 50;
+    return r;
+  }
+
+  function calc() {
+    const vma = parseFloat(vmaInput.value) || 0;
+    const pct = parseFloat(pctSlider.value) || 0;
+    const speed = vma * pct / 100;
+    const speedMs = speed * 1000 / 3600;
+    const reps = getReps();
+
+    pctValue.textContent = pct + '%';
+    const z = zoneOf(pct);
+    pctZone.textContent = z.label;
+    pctZone.className = 'pct-zone ' + z.cls;
+
+    // Unité de l'effort
+    let unitDistM = 0, unitSecs = 0;
+    if (mode === 'dist') {
+      unitDistM = getDistanceM();
+      unitSecs = unitDistM > 0 && speedMs > 0 ? unitDistM / speedMs : 0;
+      resultLabel.textContent = 'TEMPS PAR RÉPÉTITION';
+      resultMain.textContent = fmtTime(unitSecs);
+    } else {
+      unitSecs = getDurationSec();
+      unitDistM = speedMs * unitSecs;
+      resultLabel.textContent = 'DISTANCE PAR RÉPÉTITION';
+      resultMain.textContent = unitDistM > 0 ? fmtDist(unitDistM) : '—';
+    }
+
+    resultPace.textContent = fmtPace(speed);
+    resultSpeed.textContent = speed.toFixed(1) + ' km/h';
+
+    // Affichage des totaux si reps > 1
+    repsHint.textContent = '× ' + reps;
+    if (reps > 1 && (unitDistM > 0 || unitSecs > 0)) {
+      resultTotals.style.display = 'flex';
+      resultTotalDist.textContent = fmtDist(unitDistM * reps);
+      resultTotalTime.textContent = fmtTime(unitSecs * reps);
+    } else {
+      resultTotals.style.display = 'none';
+    }
+
+    document.querySelectorAll('#pctChips .chip').forEach(c => {
+      c.classList.toggle('active', parseFloat(c.dataset.pct) === pct);
+    });
+    document.querySelectorAll('#distChips .chip').forEach(c => {
+      const matchD = parseFloat(c.dataset.dist) === parseFloat(distInput.value);
+      const matchU = c.dataset.unit === unitSelect.value;
+      c.classList.toggle('active', matchD && matchU);
+    });
+    document.querySelectorAll('#timeChips .chip').forEach(c => {
+      c.classList.toggle('active', parseInt(c.dataset.sec) === getDurationSec());
+    });
+    document.querySelectorAll('#repsChips .chip').forEach(c => {
+      c.classList.toggle('active', parseInt(c.dataset.reps) === reps);
+    });
+
+    try { localStorage.setItem('vma', vmaInput.value); } catch(e) {}
+  }
+
+  function adjustVMA(delta) {
+    let v = parseFloat(vmaInput.value) || 16;
+    v = Math.round((v + delta) * 10) / 10;
+    v = Math.min(25, Math.max(6, v));
+    vmaInput.value = v;
+    calc();
+  }
+
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      mode = btn.dataset.mode;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b === btn));
+      document.getElementById('modeDist').style.display = mode === 'dist' ? 'block' : 'none';
+      document.getElementById('modeTime').style.display = mode === 'time' ? 'block' : 'none';
+      calc();
+    });
+  });
+
+  vmaInput.addEventListener('input', calc);
+  distInput.addEventListener('input', calc);
+  unitSelect.addEventListener('change', calc);
+  hoursInput.addEventListener('input', calc);
+  minsInput.addEventListener('input', calc);
+  secsInput.addEventListener('input', calc);
+  pctSlider.addEventListener('input', calc);
+  repsInput.addEventListener('input', calc);
+
+  document.getElementById('repsMinus').addEventListener('click', () => {
+    repsInput.value = Math.max(1, getReps() - 1);
+    calc();
+  });
+  document.getElementById('repsPlus').addEventListener('click', () => {
+    repsInput.value = Math.min(50, getReps() + 1);
+    calc();
+  });
+
+  document.querySelectorAll('#distChips .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      distInput.value = chip.dataset.dist;
+      unitSelect.value = chip.dataset.unit;
+      calc();
+    });
+  });
+  document.querySelectorAll('#timeChips .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const total = parseInt(chip.dataset.sec);
+      hoursInput.value = Math.floor(total / 3600);
+      minsInput.value = Math.floor((total % 3600) / 60);
+      secsInput.value = total % 60;
+      calc();
+    });
+  });
+  document.querySelectorAll('#pctChips .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      pctSlider.value = chip.dataset.pct;
+      calc();
+    });
+  });
+  document.querySelectorAll('#repsChips .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      repsInput.value = chip.dataset.reps;
+      calc();
+    });
+  });
+
+  // --- Séance ---
+  let session = [];
+  try {
+    const saved = localStorage.getItem('session');
+    if (saved) session = JSON.parse(saved);
+  } catch(e) { session = []; }
+
+  function saveSession() {
+    try { localStorage.setItem('session', JSON.stringify(session)); } catch(e) {}
+  }
+
+  function renderSession() {
+    const list = document.getElementById('sessionList');
+    const total = document.getElementById('sessionTotal');
+    if (session.length === 0) {
+      list.innerHTML = '<div class="session-empty">Aucun bloc. Ajoute des efforts pour composer ta séance.</div>';
+      total.style.display = 'none';
+      return;
+    }
+    let totalDist = 0, totalTime = 0;
+    list.innerHTML = session.map((b, i) => {
+      const speed = b.vma * b.pct / 100;
+      const speedMs = speed * 1000 / 3600;
+      const reps = b.reps || 1;
+      let unitDistM, unitSecs;
+      if (b.mode === 'dist') {
+        unitDistM = b.distM;
+        unitSecs = speedMs > 0 ? unitDistM / speedMs : 0;
+      } else {
+        unitSecs = b.duration;
+        unitDistM = speedMs * unitSecs;
+      }
+      const distM = unitDistM * reps;
+      const secs = unitSecs * reps;
+      totalDist += distM;
+      totalTime += secs;
+      const z = zoneOf(b.pct);
+      const unitLabel = b.mode === 'dist' ? fmtDist(unitDistM) : fmtTime(unitSecs);
+      const repsPrefix = reps > 1 ? `${reps} × ` : '';
+      const mainLabel = `${repsPrefix}${unitLabel} @ ${b.pct}% VMA`;
+      const rightTop = fmtTime(secs);
+      const rightBottom = fmtDist(distM);
+      return `<div class="block ${z.block}">
+        <div class="block-info">
+          <div class="block-main">${mainLabel}</div>
+          <div class="block-sub">${fmtPace(speed)} · VMA ${b.vma} km/h${reps > 1 ? ` · 1 rép. = ${b.mode === 'dist' ? fmtTime(unitSecs) : fmtDist(unitDistM)}` : ''}</div>
+        </div>
+        <div class="block-right">
+          <div class="block-time">${rightTop}</div>
+          <div class="block-dist">${rightBottom}</div>
+        </div>
+        <button class="block-del" data-i="${i}" title="Supprimer">✕</button>
+      </div>`;
+    }).join('');
+    document.getElementById('totalDist').textContent = fmtDist(totalDist);
+    document.getElementById('totalTime').textContent = fmtTime(totalTime);
+    total.style.display = 'flex';
+
+    list.querySelectorAll('.block-del').forEach(btn => {
+      btn.addEventListener('click', () => {
+        session.splice(parseInt(btn.dataset.i), 1);
+        saveSession();
+        renderSession();
+      });
+    });
+  }
+
+  document.getElementById('addBtn').addEventListener('click', () => {
+    const vma = parseFloat(vmaInput.value);
+    const pct = parseFloat(pctSlider.value);
+    const reps = getReps();
+    if (mode === 'dist') {
+      const distM = getDistanceM();
+      if (distM <= 0) return;
+      session.push({ mode: 'dist', distM, pct, vma, reps });
+    } else {
+      const duration = getDurationSec();
+      if (duration <= 0) return;
+      session.push({ mode: 'time', duration, pct, vma, reps });
+    }
+    saveSession();
+    renderSession();
+  });
+
+  // ====== Bouton "Tout effacer" avec confirmation inline ======
+  const clearBtn = document.getElementById('clearBtn');
+  let clearConfirmTimer = null;
+  clearBtn.addEventListener('click', () => {
+    if (session.length === 0) return;
+    if (clearBtn.classList.contains('confirm')) {
+      // 2e clic : on efface
+      session = [];
+      saveSession();
+      renderSession();
+      clearBtn.classList.remove('confirm');
+      clearBtn.textContent = 'Tout effacer';
+      if (clearConfirmTimer) { clearTimeout(clearConfirmTimer); clearConfirmTimer = null; }
+    } else {
+      // 1er clic : on passe en confirmation
+      clearBtn.classList.add('confirm');
+      clearBtn.textContent = 'Confirmer ?';
+      clearConfirmTimer = setTimeout(() => {
+        clearBtn.classList.remove('confirm');
+        clearBtn.textContent = 'Tout effacer';
+        clearConfirmTimer = null;
+      }, 3000);
+    }
+  });
+
+  try {
+    const saved = localStorage.getItem('vma');
+    if (saved) vmaInput.value = saved;
+  } catch(e) {}
+
+  calc();
+  renderSession();
+
+
+  // =========================================
+  // ====== ONGLET 2 : ALLURE COURSE =========
+  // =========================================
+  //
+  // Variables d'état :
+  //  rt = running time (sec), d = distance (m), p = pace (sec/km), v = speed (km/h)
+  //
+  // On garde une liste ORDONNÉE des champs qui ont été saisis par l'utilisateur (max 2).
+  // Dès que 2 champs sont saisis, on calcule les 2 autres.
+  // Quand un 3e champ est modifié manuellement, le plus ancien des 2 "saisis" est oublié.
+
+  const rtH = document.getElementById('rtH');
+  const rtM = document.getElementById('rtM');
+  const rtS = document.getElementById('rtS');
+  const rDist = document.getElementById('rDist');
+  const rUnit = document.getElementById('rUnit');
+  const pM = document.getElementById('pM');
+  const pS = document.getElementById('pS');
+  const rSpeed = document.getElementById('rSpeed');
+
+  const fieldNames = { rt: 'Temps', d: 'Distance', p: 'Allure', v: 'Vitesse' };
+  // Ordre de saisie des champs (max 2 éléments)
+  let userFields = [];
+
+  function hasValue(field) {
+    if (field === 'rt') {
+      return (rtH.value !== '' || rtM.value !== '' || rtS.value !== '') &&
+             (parseInt(rtH.value) || 0) * 3600 + (parseInt(rtM.value) || 0) * 60 + (parseInt(rtS.value) || 0) > 0;
+    }
+    if (field === 'd') return rDist.value !== '' && parseFloat(rDist.value) > 0;
+    if (field === 'p') {
+      return (pM.value !== '' || pS.value !== '') &&
+             (parseInt(pM.value) || 0) * 60 + (parseInt(pS.value) || 0) > 0;
+    }
+    if (field === 'v') return rSpeed.value !== '' && parseFloat(rSpeed.value) > 0;
+    return false;
+  }
+
+  function getRT() {
+    return (parseInt(rtH.value) || 0) * 3600 + (parseInt(rtM.value) || 0) * 60 + (parseInt(rtS.value) || 0);
+  }
+  function getDistanceAllure() {
+    const v = parseFloat(rDist.value);
+    if (!isFinite(v) || v <= 0) return 0;
+    return rUnit.value === 'km' ? v * 1000 : v;
+  }
+  function getPaceSec() {
+    return (parseInt(pM.value) || 0) * 60 + (parseInt(pS.value) || 0);
+  }
+  function getSpeed() {
+    const v = parseFloat(rSpeed.value);
+    return isFinite(v) && v > 0 ? v : 0;
+  }
+
+  function setRT(sec) {
+    sec = Math.round(sec);
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    rtH.value = h;
+    rtM.value = m;
+    rtS.value = s;
+  }
+  function setDistance(meters) {
+    if (rUnit.value === 'km') {
+      rDist.value = (meters / 1000).toFixed(meters % 1000 === 0 ? 0 : 3).replace(/\.?0+$/, '');
+    } else {
+      rDist.value = Math.round(meters);
+    }
+  }
+  function setPace(secPerKm) {
+    secPerKm = Math.round(secPerKm);
+    pM.value = Math.floor(secPerKm / 60);
+    pS.value = secPerKm % 60;
+  }
+  function setSpeed(kmh) {
+    rSpeed.value = kmh.toFixed(2).replace(/\.?0+$/, '');
+  }
+
+  function updateHints() {
+    const labels = { rt: 'hint-rt', d: 'hint-d', p: 'hint-p', v: 'hint-v' };
+    Object.keys(labels).forEach(f => {
+      const el = document.getElementById(labels[f]);
+      if (userFields.includes(f)) {
+        el.textContent = 'saisi';
+        el.classList.add('filled');
+      } else if (hasValue(f)) {
+        el.textContent = 'calculé';
+        el.classList.remove('filled');
+        el.style.color = '#38bdf8';
+      } else {
+        el.textContent = '—';
+        el.classList.remove('filled');
+        el.style.color = '';
+      }
+    });
+
+    // Style computed sur les lignes
+    document.getElementById('rtRow').classList.toggle('computed', !userFields.includes('rt') && hasValue('rt'));
+    document.getElementById('pRow').classList.toggle('computed', !userFields.includes('p') && hasValue('p'));
+    rDist.classList.toggle('computed', !userFields.includes('d') && hasValue('d'));
+    rSpeed.classList.toggle('computed', !userFields.includes('v') && hasValue('v'));
+  }
+
+  function computeAllure() {
+    // Si on a 2 champs saisis, on calcule les autres
+    if (userFields.length < 2) {
+      updateHints();
+      return;
+    }
+
+    const [a, b] = userFields;
+    const inputs = new Set([a, b]);
+
+    let rt = null, d = null, p = null, v = null;
+    if (inputs.has('rt')) rt = getRT();
+    if (inputs.has('d')) d = getDistanceAllure();
+    if (inputs.has('p')) p = getPaceSec();
+    if (inputs.has('v')) v = getSpeed();
+
+    // Dérivation des 4 valeurs
+    // Relations :
+    //  v (km/h) = 3600 / p (sec/km)     et     p = 3600 / v
+    //  d (m) = v * 1000/3600 * rt       et     rt = d / (v * 1000/3600)
+    //  v = d/1000 / (rt/3600) = 3.6 * d / rt
+
+    // Cas par paires :
+    if (rt !== null && d !== null) {
+      if (rt <= 0 || d <= 0) return;
+      v = 3.6 * d / rt;
+      p = 3600 / v;
+    } else if (rt !== null && p !== null) {
+      if (rt <= 0 || p <= 0) return;
+      v = 3600 / p;
+      d = v * 1000 / 3600 * rt;
+    } else if (rt !== null && v !== null) {
+      if (rt <= 0 || v <= 0) return;
+      p = 3600 / v;
+      d = v * 1000 / 3600 * rt;
+    } else if (d !== null && p !== null) {
+      if (d <= 0 || p <= 0) return;
+      v = 3600 / p;
+      rt = d / (v * 1000 / 3600);
+    } else if (d !== null && v !== null) {
+      if (d <= 0 || v <= 0) return;
+      p = 3600 / v;
+      rt = d / (v * 1000 / 3600);
+    } else if (p !== null && v !== null) {
+      // p et v sont liés, on ne peut pas déduire d et rt
+      if (p <= 0 || v <= 0) { updateHints(); return; }
+      // On garde juste la cohérence : si l'un a été modifié, on calcule l'autre
+      updateHints();
+      return;
+    }
+
+    // Écrire dans les champs NON saisis
+    if (!inputs.has('rt') && rt !== null) setRT(rt);
+    if (!inputs.has('d') && d !== null) setDistance(d);
+    if (!inputs.has('p') && p !== null) setPace(p);
+    if (!inputs.has('v') && v !== null) setSpeed(v);
+
+    updateHints();
+  }
+
+  // Quand l'utilisateur saisit un champ :
+  function onFieldInput(field) {
+    if (!hasValue(field)) {
+      // Champ vidé : on le retire de la liste
+      userFields = userFields.filter(f => f !== field);
+      computeAllure();
+      return;
+    }
+    // Champ saisi
+    if (userFields.includes(field)) {
+      // Déjà dans la liste : recalcule simplement
+      computeAllure();
+      return;
+    }
+    // Nouveau champ saisi
+    userFields.push(field);
+    if (userFields.length > 2) {
+      // On retire le plus ancien
+      userFields.shift();
+    }
+    computeAllure();
+  }
+
+  // Binder tous les inputs de cet onglet
+  [rtH, rtM, rtS, rDist, pM, pS, rSpeed].forEach(el => {
+    el.addEventListener('input', () => onFieldInput(el.dataset.field));
+  });
+  rUnit.addEventListener('change', () => {
+    // Changer l'unité compte comme une modification de la distance si elle a une valeur
+    if (hasValue('d')) {
+      onFieldInput('d');
+    }
+  });
+
+  // Chips distance
+  document.querySelectorAll('#rDistChips .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      rDist.value = chip.dataset.rd;
+      rUnit.value = chip.dataset.ru;
+      onFieldInput('d');
+    });
+  });
+
+  // Reset
+  document.getElementById('resetAllure').addEventListener('click', () => {
+    rtH.value = ''; rtM.value = ''; rtS.value = '';
+    rDist.value = '';
+    pM.value = ''; pS.value = '';
+    rSpeed.value = '';
+    userFields = [];
+    document.getElementById('rtRow').classList.remove('computed');
+    document.getElementById('pRow').classList.remove('computed');
+    rDist.classList.remove('computed');
+    rSpeed.classList.remove('computed');
+    updateHints();
+  });
+
+  updateHints();
+
+
+  // =========================================
+  // ====== ONGLET 3 : SIMULATEUR ============
+  // =========================================
+
+  const vmaSimuInput = document.getElementById('vmaSimu');
+
+  // Configuration des courses : nom, distance (m), % de VMA tenable
+  const races = [
+    { key: '5k',   name: '5 km',          distM: 5000,  pct: 92, cls: 'race-5k' },
+    { key: '10k',  name: '10 km',         distM: 10000, pct: 90, cls: 'race-10k' },
+    { key: 'semi', name: 'Semi-marathon', distM: 21100, pct: 85, cls: 'race-semi' },
+    { key: 'mara', name: 'Marathon',      distM: 42195, pct: 80, cls: 'race-mara' },
+  ];
+
+  function adjustVMASimu(delta) {
+    let v = parseFloat(vmaSimuInput.value) || 16;
+    v = Math.round((v + delta) * 10) / 10;
+    v = Math.min(25, Math.max(6, v));
+    vmaSimuInput.value = v;
+    renderSimu();
+  }
+
+  // Synchronisation VMA entre les deux onglets
+  function syncVMA(source) {
+    const v = parseFloat(source.value);
+    if (!isFinite(v)) return;
+    if (source === vmaInput) vmaSimuInput.value = v;
+    else vmaInput.value = v;
+  }
+
+  vmaSimuInput.addEventListener('input', () => {
+    syncVMA(vmaSimuInput);
+    try { localStorage.setItem('vma', vmaSimuInput.value); } catch(e) {}
+    renderSimu();
+    calc(); // met à jour l'onglet séance aussi
+  });
+  vmaInput.addEventListener('input', () => {
+    syncVMA(vmaInput);
+    renderSimu();
+  });
+
+  function renderSimu() {
+    const vma = parseFloat(vmaSimuInput.value) || 0;
+    const container = document.getElementById('simuRaces');
+    if (vma <= 0) { container.innerHTML = ''; return; }
+
+    container.innerHTML = races.map(r => {
+      const speedKmh = vma * r.pct / 100;
+      const speedMs = speedKmh * 1000 / 3600;
+      const totalSec = r.distM / speedMs;
+      const paceSec = 3600 / speedKmh; // sec par km
+      const distKm = r.distM / 1000;
+
+      // Splits km par km
+      let splitsHtml = '';
+      const wholeKm = Math.floor(distKm);
+      for (let k = 1; k <= wholeKm; k++) {
+        const cum = paceSec * k;
+        splitsHtml += `<div class="simu-split-row">
+          <span class="simu-split-km">Km ${k}</span>
+          <span class="simu-split-time">${fmtTime(paceSec)}</span>
+          <span class="simu-split-cum">${fmtTime(cum)}</span>
+        </div>`;
+      }
+      // Dernier km partiel (semi = 21.1, marathon = 42.195)
+      const partial = distKm - wholeKm;
+      if (partial > 0.01) {
+        const partialSec = paceSec * partial;
+        splitsHtml += `<div class="simu-split-row">
+          <span class="simu-split-km">Km ${wholeKm}–${distKm.toFixed(distKm % 1 === 0 ? 0 : 3).replace(/\.?0+$/, '')}</span>
+          <span class="simu-split-time">${fmtTime(partialSec)}</span>
+          <span class="simu-split-cum">${fmtTime(totalSec)}</span>
+        </div>`;
+      }
+
+      return `<div class="simu-race ${r.cls}">
+        <div class="simu-race-header">
+          <div>
+            <div class="simu-race-name">${r.name}</div>
+            <div class="simu-race-dist">${r.distM.toLocaleString('fr-FR')} m</div>
+          </div>
+          <div>
+            <div class="simu-race-time">${fmtTime(totalSec)}</div>
+            <div class="simu-race-pct" style="float:right">${r.pct}% VMA</div>
+          </div>
+        </div>
+        <div class="simu-details">
+          <div class="simu-detail-box">
+            <div class="simu-detail-label">Allure</div>
+            <div class="simu-detail-value">${fmtPace(speedKmh).replace('/km', '')}</div>
+          </div>
+          <div class="simu-detail-box">
+            <div class="simu-detail-label">Vitesse</div>
+            <div class="simu-detail-value">${speedKmh.toFixed(1)} km/h</div>
+          </div>
+          <div class="simu-detail-box">
+            <div class="simu-detail-label">Temps/km</div>
+            <div class="simu-detail-value">${fmtTime(paceSec)}</div>
+          </div>
+        </div>
+        <div class="simu-splits-title">Temps par kilomètre (cumulé)</div>
+        <div class="simu-splits">${splitsHtml}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Init : charger la VMA sauvegardée dans l'input du simu
+  try {
+    const saved = localStorage.getItem('vma');
+    if (saved) vmaSimuInput.value = saved;
+  } catch(e) {}
+  renderSimu();
+</script>
+</body>
+</html>
